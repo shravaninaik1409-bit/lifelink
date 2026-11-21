@@ -1,0 +1,540 @@
+/* LifeLink — Comprehensive Dashboard Theme & Components */
+:root {
+    --primary-red: #DC2626;
+    --primary-red-hover: #B91C1C;
+    --primary-crimson: #E11D48;
+    --primary-dark: #0B192C;
+    --navy-slate: #1E293B;
+    --navy-blue: #1E3A5F;
+    --accent-cyan: #0284C7;
+    --accent-sky: #0EA5E9;
+    --text-primary: #0F172A;
+    --text-muted: #64748B;
+    --bg-light: #F8FAFC;
+    --border-color: #E2E8F0;
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.06);
+    --shadow-lg: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: #F8FAFC;
+}
+
+/* Sidebar */
+.dashboard-sidebar {
+    width: 260px;
+    background: #0B192C;
+    color: #94A3B8;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #1E293B;
+    transition: all 0.3s ease;
+}
+
+.sidebar-brand {
+    padding: 22px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #FFFFFF;
+    font-size: 1.35rem;
+    font-weight: 800;
+}
+
+.sidebar-brand i {
+    color: #DC2626;
+}
+
+.sidebar-user {
+    padding: 18px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0284C7, #0EA5E9);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.05rem;
+    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 12px 10px;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.sidebar-menu .menu-header {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748B;
+    padding: 12px 14px 6px;
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    color: #CBD5E1;
+    font-weight: 500;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    margin-bottom: 3px;
+    transition: all 0.2s ease;
+}
+
+.sidebar-menu li a i {
+    font-size: 1.05rem;
+    width: 20px;
+    text-align: center;
+    color: #94A3B8;
+}
+
+.sidebar-menu li a:hover {
+    color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.sidebar-menu li.active a, .sidebar-menu li a.active {
+    color: #FFFFFF;
+    background: linear-gradient(135deg, #DC2626, #E11D48);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+}
+
+.sidebar-menu li.active a i, .sidebar-menu li a.active i {
+    color: #FFFFFF;
+}
+
+/* Main Content Area */
+.dashboard-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background-color: #F8FAFC;
+}
+
+.dashboard-topbar {
+    height: 68px;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E2E8F0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    position: sticky;
+    top: 0;
+    z-index: 99;
+}
+
+.dashboard-body {
+    padding: 28px;
+    flex-grow: 1;
+}
+
+/* Welcome Card */
+.donor-welcome-card {
+    background: linear-gradient(135deg, #0B192C 0%, #1E3A5F 60%, #102A43 100%);
+    border-radius: 16px;
+    color: #FFFFFF;
+    padding: 26px 30px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.donor-welcome-card::after {
+    content: '';
+    position: absolute;
+    right: -30px;
+    top: -30px;
+    width: 240px;
+    height: 240px;
+    background: radial-gradient(circle, rgba(220, 38, 38, 0.18) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.donor-badge-large {
+    width: 68px;
+    height: 68px;
+    border-radius: 16px;
+    background: #FFFFFF;
+    color: #DC2626;
+    font-size: 1.75rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
+}
+
+/* Availability Card & Toggle */
+.avail-toggle-box {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 12px 16px;
+}
+
+.avail-btn-group {
+    display: flex;
+    gap: 6px;
+}
+
+.avail-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.15);
+    color: #E2E8F0;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.avail-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: #FFFFFF;
+}
+
+.avail-btn.active-available {
+    background: #10B981;
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.avail-btn.active-temp {
+    background: #F59E0B;
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.avail-btn.active-off {
+    background: #64748B;
+    color: #FFFFFF;
+}
+
+/* Metric Cards */
+.metric-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 20px 22px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+    height: 100%;
+}
+
+.metric-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: #CBD5E1;
+    transform: translateY(-2px);
+}
+
+.metric-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+}
+
+.metric-value {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #0F172A;
+    line-height: 1.1;
+    margin-top: 4px;
+}
+
+.metric-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Content Cards */
+.content-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.content-card-header {
+    padding: 16px 22px;
+    border-bottom: 1px solid #E2E8F0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #FFFFFF;
+}
+
+.content-card-body {
+    padding: 22px;
+}
+
+/* Onboarding Checklist Card for New Donors */
+.onboarding-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-left: 4px solid #0284C7;
+    border-radius: 14px;
+    padding: 20px 24px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 24px;
+}
+
+.checklist-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.checklist-step:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.checklist-icon-done {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #DCFCE7;
+    color: #15803D;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.checklist-icon-pending {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #FEF3C7;
+    color: #B45309;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+/* Quick Action Tiles */
+.quick-action-tile {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.quick-action-tile:hover {
+    border-color: #DC2626;
+    background: #FEF2F2;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.quick-action-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+/* Notification Items */
+.notification-item {
+    padding: 14px 18px;
+    border-bottom: 1px solid #F1F5F9;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    transition: background-color 0.2s ease;
+}
+
+.notification-item:hover {
+    background-color: #F8FAFC;
+}
+
+.notification-item.unread {
+    background-color: #EFF6FF;
+    border-left: 3px solid #0284C7;
+}
+
+.notification-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+/* Request Tracking Timeline */
+.tracking-timeline {
+    position: relative;
+    padding: 20px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.tracking-timeline::before {
+    content: '';
+    position: absolute;
+    top: 36px;
+    left: 40px;
+    right: 40px;
+    height: 4px;
+    background: #E2E8F0;
+    z-index: 1;
+}
+
+.timeline-step {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    flex: 1;
+}
+
+.timeline-step .step-node {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 3px solid #CBD5E1;
+    color: #64748B;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.timeline-step.completed .step-node {
+    background: #10B981;
+    border-color: #10B981;
+    color: #FFFFFF;
+}
+
+.timeline-step.active .step-node {
+    background: #DC2626;
+    border-color: #DC2626;
+    color: #FFFFFF;
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.2);
+}
+
+.timeline-step .step-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748B;
+}
+
+.timeline-step.completed .step-label,
+.timeline-step.active .step-label {
+    color: #0F172A;
+    font-weight: 700;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+    .dashboard-sidebar {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        bottom: 0;
+        z-index: 1050;
+    }
+    .dashboard-sidebar.show {
+        left: 0;
+    }
+    .dashboard-topbar {
+        padding: 0 16px;
+    }
+    .dashboard-body {
+        padding: 16px;
+    }
+    .tracking-timeline {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+    }
+    .tracking-timeline::before {
+        display: none;
+    }
+    .timeline-step {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        text-align: left;
+    }
+}
+
+/* Donor Top Navigation Styles */
+.hover-text-white:hover {
+    color: #FFFFFF !important;
+}
+
+.navbar .nav-link {
+    transition: all 0.2s ease-in-out;
+}
+
+.navbar .nav-link:hover {
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.08);
+}
