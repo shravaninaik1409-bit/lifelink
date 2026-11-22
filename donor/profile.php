@@ -23,7 +23,7 @@ if (!$donor) {
 }
 
 // Fetch donation counts
-$donationsCount = (int)$db->query("SELECT COUNT(*) FROM donations WHERE donor_id = " . (int)$donor['donor_id'] . " AND verification_status = 'Verified'")->fetchColumn();
+$donationsCount = (int)$db->query("SELECT COUNT(*) FROM donations WHERE donor_id = " . (int)$donor['donor_id'] . " AND verification_status IN ('Verified', 'Approved')")->fetchColumn();
 
 // Fetch response history
 $respStmt = $db->prepare("SELECT rr.*, br.unique_request_number, br.blood_group as req_bg, br.hospital_name, br.city as req_city, br.urgency, br.status as req_status 

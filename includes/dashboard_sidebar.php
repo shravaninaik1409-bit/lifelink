@@ -95,6 +95,11 @@ $currentScript = basename($_SERVER['PHP_SELF']);
                     <i class="fa-solid fa-user-shield text-danger"></i> <span>Verification Panel</span>
                 </a>
             </li>
+            <li class="<?= $currentScript === 'donations.php' ? 'active' : '' ?>">
+                <a href="<?= BASE_URL ?>/admin/donations.php">
+                    <i class="fa-solid fa-clock-rotate-left text-danger"></i> <span>Donation Records</span>
+                </a>
+            </li>
             <li class="<?= $currentScript === 'users.php' ? 'active' : '' ?>">
                 <a href="<?= BASE_URL ?>/admin/users.php">
                     <i class="fa-solid fa-users"></i> <span>User Management</span>

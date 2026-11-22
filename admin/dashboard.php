@@ -117,7 +117,7 @@ try {
     $stats['pending_requests'] = (int)$db->query("SELECT COUNT(*) FROM blood_requests WHERE status IN ('Pending', 'Donors Notified')")->fetchColumn();
     $stats['emergency_requests'] = (int)$db->query("SELECT COUNT(*) FROM blood_requests WHERE urgency = 'Emergency' AND status != 'Completed' AND status != 'Cancelled'")->fetchColumn();
     $stats['completed_requests'] = (int)$db->query("SELECT COUNT(*) FROM blood_requests WHERE status = 'Completed'")->fetchColumn();
-    $stats['total_donations'] = (int)$db->query("SELECT COUNT(*) FROM donations WHERE verification_status = 'Verified'")->fetchColumn();
+    $stats['total_donations'] = (int)$db->query("SELECT COUNT(*) FROM donations WHERE verification_status IN ('Verified', 'Approved')")->fetchColumn();
     $stats['pending_verifications'] = (int)$db->query("SELECT COUNT(*) FROM users u JOIN donors d ON u.user_id = d.user_id WHERE u.verification_status = 'pending'")->fetchColumn();
 
     // Blood Group Distribution

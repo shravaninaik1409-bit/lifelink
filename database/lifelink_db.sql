@@ -97,10 +97,16 @@ CREATE TABLE IF NOT EXISTS `donations` (
   `donation_date` DATE NOT NULL,
   `hospital_name` VARCHAR(150) NOT NULL,
   `units_donated` INT DEFAULT 1,
-  `verification_status` ENUM('Verified', 'Pending', 'Rejected') DEFAULT 'Verified',
+  `verification_status` ENUM('Pending', 'Verified', 'Approved', 'Rejected') DEFAULT 'Pending',
+  `verified_by` INT NULL,
+  `verified_at` DATETIME NULL,
+  `admin_notes` TEXT NULL,
+  `certificate_no` VARCHAR(100) NULL,
+  `submission_type` ENUM('manual', 'request_completion') DEFAULT 'manual',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT `fk_donations_donor` FOREIGN KEY (`donor_id`) REFERENCES `donors` (`donor_id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_donations_request` FOREIGN KEY (`request_id`) REFERENCES `blood_requests` (`request_id`) ON DELETE SET NULL
+  CONSTRAINT `fk_donations_request` FOREIGN KEY (`request_id`) REFERENCES `blood_requests` (`request_id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_donations_admin` FOREIGN KEY (`verified_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 6. NOTIFICATIONS TABLE
@@ -185,6 +191,26 @@ CREATE TABLE IF NOT EXISTS `password_resets` (
   `used_at` DATETIME NULL,
   INDEX `idx_token_hash` (`token_hash`),
   CONSTRAINT `fk_password_resets_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 13. DONOR SCREENINGS TABLE (Recurring Health & Eligibility Reconfirmation)
+CREATE TABLE IF NOT EXISTS `donor_screenings` (
+  `screening_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `donor_id` INT NOT NULL,
+  `request_id` INT NULL,
+  `donated_recently` ENUM('Yes', 'No') NOT NULL DEFAULT 'No',
+  `feeling_well` ENUM('Yes', 'No') NOT NULL DEFAULT 'Yes',
+  `medical_advice` ENUM('Yes', 'No') NOT NULL DEFAULT 'No',
+  `recent_medication_illness` ENUM('Yes', 'No') NOT NULL DEFAULT 'No',
+  `willing_to_donate` ENUM('Yes', 'No') NOT NULL DEFAULT 'Yes',
+  `answers_confirmed_accurate` TINYINT(1) DEFAULT 1,
+  `eligibility_status` ENUM('Self_Reported_Eligible', 'Requires_Medical_Review') DEFAULT 'Self_Reported_Eligible',
+  `notes` TEXT NULL,
+  `screening_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_screening_donor` (`donor_id`),
+  INDEX `idx_screening_request` (`request_id`),
+  CONSTRAINT `fk_screenings_donor` FOREIGN KEY (`donor_id`) REFERENCES `donors` (`donor_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_screenings_request` FOREIGN KEY (`request_id`) REFERENCES `blood_requests` (`request_id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- SEED DATA

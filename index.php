@@ -20,7 +20,7 @@ if ($db) {
         $totalDonors = (int)$db->query("SELECT COUNT(*) FROM donors")->fetchColumn();
         $availableDonors = (int)$db->query("SELECT COUNT(*) FROM donors WHERE availability = 'Available'")->fetchColumn();
         $totalRequests = (int)$db->query("SELECT COUNT(*) FROM blood_requests")->fetchColumn();
-        $completedDonations = (int)$db->query("SELECT COUNT(*) FROM donations WHERE verification_status = 'Verified'")->fetchColumn();
+        $completedDonations = (int)$db->query("SELECT COUNT(*) FROM donations WHERE verification_status IN ('Verified', 'Approved')")->fetchColumn();
 
         // Fetch active emergency or urgent requests for marquee / cards
         $stmt = $db->query("SELECT * FROM blood_requests WHERE status IN ('Pending', 'Donors Notified', 'Donor Response Received') AND urgency IN ('Emergency', 'Urgent') ORDER BY urgency = 'Emergency' DESC, created_at DESC LIMIT 3");

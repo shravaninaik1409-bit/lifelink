@@ -220,3 +220,71 @@ function getBloodCompatibility($bloodGroup) {
     ];
     return $matrix[$bloodGroup] ?? ['give' => [], 'receive' => []];
 }
+/**
+ * Update Donor Milestone Badges based strictly on approved donations
+ */
+function updateDonorMilestoneBadges($pdo, $donorId) {
+    try {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM donations WHERE donor_id = ? AND verification_status IN ('Verified', 'Approved')");
+        $stmt->execute([$donorId]);
+        $count = (int)$stmt->fetchColumn();
+
+        $badges = [];
+        if ($count >= 1) $badges[] = 'First Donation';
+        if ($count >= 3) $badges[] = 'Bronze LifeSaver';
+        if ($count >= 5) $badges[] = 'Silver Guardian';
+        if ($count >= 10) $badges[] = 'Gold Hero';
+
+        if (empty($badges)) {
+            $badgeStr = 'First Donation';
+        } else {
+            $badgeStr = implode(', ', $badges);
+        }
+
+        $upd = $pdo->prepare("UPDATE donors SET badges = ? WHERE donor_id = ?");
+        $upd->execute([$badgeStr, $donorId]);
+        return $badgeStr;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+/**
+ * Check if a donor health screening is outdated (>90 days default interval)
+ */
+function isScreeningOutdated($screeningDate, $validityDays = 90) {
+    if (empty($screeningDate)) return true;
+    $time = strtotime($screeningDate);
+    $diffDays = (time() - $time) / 86400;
+    return ($diffDays > $validityDays);
+}
+
+/**
+ * Get Screening Status Badge HTML
+ */
+function getScreeningStatusBadge($screeningDate, $isCompleted) {
+    if (!$isCompleted || empty($screeningDate)) {
+        return '<span class="badge bg-warning text-dark"><i class="fa-solid fa-triangle-exclamation me-1"></i>Screening Incomplete</span>';
+    }
+    if (isScreeningOutdated($screeningDate)) {
+        return '<span class="badge bg-danger text-white"><i class="fa-solid fa-clock-rotate-left me-1"></i>Screening Renewal Due (>90d)</span>';
+    }
+    return '<span class="badge bg-success text-white"><i class="fa-solid fa-heart-pulse me-1"></i>Health Screening Current</span>';
+}
+
+/**
+ * Get Donation Status Badge HTML
+ */
+function getDonationStatusBadge($status) {
+    switch ($status) {
+        case 'Verified':
+        case 'Approved':
+            return '<span class="badge bg-success text-white"><i class="fa-solid fa-circle-check me-1"></i>Approved</span>';
+        case 'Pending':
+            return '<span class="badge bg-warning text-dark"><i class="fa-solid fa-hourglass-half me-1"></i>Pending Review</span>';
+        case 'Rejected':
+            return '<span class="badge bg-danger text-white"><i class="fa-solid fa-circle-xmark me-1"></i>Rejected</span>';
+        default:
+            return '<span class="badge bg-secondary">' . htmlspecialchars((string)$status) . '</span>';
+    }
+}

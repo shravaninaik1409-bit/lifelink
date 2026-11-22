@@ -35,13 +35,18 @@ $city = $donor['city'];
 
 // Handle quick availability toggle
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_availability'])) {
-    $newStatus = sanitize($_POST['set_availability']);
-    if (in_array($newStatus, ['Available', 'Temporarily Unavailable', 'Not Accepting Requests'])) {
-        $upd = $db->prepare("UPDATE donors SET availability = ? WHERE donor_id = ?");
-        $upd->execute([$newStatus, $donorId]);
-        $donor['availability'] = $newStatus;
-        $_SESSION['availability'] = $newStatus;
-        $_SESSION['flash_msg'] = "Your availability status is now set to: " . htmlspecialchars($newStatus);
+    $csrfToken = $_POST['csrf_token'] ?? '';
+    if (!verifyCSRFToken($csrfToken)) {
+        $_SESSION['flash_error'] = "Security validation failed. Please refresh the page.";
+    } else {
+        $newStatus = sanitize($_POST['set_availability']);
+        if (in_array($newStatus, ['Available', 'Temporarily Unavailable', 'Not Accepting Requests'])) {
+            $upd = $db->prepare("UPDATE donors SET availability = ? WHERE donor_id = ?");
+            $upd->execute([$newStatus, $donorId]);
+            $donor['availability'] = $newStatus;
+            $_SESSION['availability'] = $newStatus;
+            $_SESSION['flash_msg'] = "Your availability status is now set to: " . htmlspecialchars($newStatus);
+        }
     }
 }
 
@@ -66,7 +71,7 @@ try {
     $acceptedRequests = (int)$stmtAccepted->fetchColumn();
 
     // Verified donations completed
-    $stmtDon = $db->prepare("SELECT COUNT(*) FROM donations WHERE donor_id = ? AND verification_status = 'Verified'");
+    $stmtDon = $db->prepare("SELECT COUNT(*) FROM donations WHERE donor_id = ? AND verification_status IN ('Verified', 'Approved')");
     $stmtDon->execute([$donorId]);
     $totalDonations = (int)$stmtDon->fetchColumn();
 
@@ -174,6 +179,7 @@ require_once __DIR__ . '/../includes/donor_navbar.php';
                                 <i class="fa-solid fa-tower-broadcast text-danger me-1"></i> Quick Availability Status:
                             </label>
                             <form method="POST" action="" class="d-flex gap-2">
+                                <input type="hidden" name="csrf_token" value="<?= getCSRFToken() ?>">
                                 <button type="submit" name="set_availability" value="Available" 
                                         class="btn btn-sm flex-fill py-2 fw-semibold <?= $donor['availability'] === 'Available' ? 'btn-success text-white shadow' : 'btn-outline-light text-white' ?>">
                                     🟢 Available
@@ -271,17 +277,19 @@ require_once __DIR__ . '/../includes/donor_navbar.php';
                         </p>
                     </div>
 
-                    <!-- Parameter 3: Medical Eligibility -->
+                    <!-- Parameter 3: Clinical Eligibility & Screening -->
                     <div class="col-md-4">
                         <small class="text-muted text-uppercase fw-bold d-block mb-2" style="font-size: 0.75rem;">
                             <i class="fa-solid fa-stethoscope text-danger me-1"></i> 3. Clinical Eligibility
                         </small>
                         <div class="mb-2">
-                            <?= getMedicalEligibilityBadge() ?>
+                            <?= getScreeningStatusBadge($donor['screening_date'], $donor['screening_completed']) ?>
                         </div>
                         <p class="small text-muted mb-0" style="font-size: 0.82rem;">
-                            <?php if (!empty($donor['screening_completed'])): ?>
-                                <span class="text-success fw-semibold"><i class="fa-solid fa-clipboard-check me-1"></i>Screening Acknowledgment Completed</span>.
+                            <?php if (!empty($donor['screening_completed']) && !isScreeningOutdated($donor['screening_date'])): ?>
+                                <span class="text-success fw-semibold"><i class="fa-solid fa-circle-check me-1"></i>Screening Valid</span> (Done: <?= date('d M Y', strtotime($donor['screening_date'])) ?>).
+                            <?php elseif (!empty($donor['screening_completed'])): ?>
+                                <span class="text-warning fw-semibold"><i class="fa-solid fa-clock-rotate-left me-1"></i>Screening Expired</span> (> 90 days; re-screen on next response).
                             <?php else: ?>
                                 <span class="text-warning fw-semibold"><i class="fa-solid fa-clipboard-question me-1"></i>Screening Pending</span>.
                             <?php endif; ?>

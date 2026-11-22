@@ -98,6 +98,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if ($role === 'donor') {
                             $dStmt = $db->prepare("INSERT INTO donors (user_id, blood_group, date_of_birth, gender, state, city, area, pin_code, availability, badges, screening_completed, screening_answers, screening_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'First Donation', 1, ?, NOW())");
                             $dStmt->execute([$newUserId, $bloodGroup, !empty($dob) ? $dob : null, $gender, $state, $city, $area, $pinCode, $availability, $screeningAnswersJson]);
+                            $newDonorId = (int)$db->lastInsertId();
+
+                            // Record baseline entry in donor_screenings ledger
+                            $isEligible = ($screeningFeelingWell === 'Yes' && $screeningRecent === 'No' && $screeningMedicalAdvice === 'No' && $screeningWilling === 'Yes') ? 'Self_Reported_Eligible' : 'Requires_Medical_Review';
+                            $scrStmt = $db->prepare("INSERT INTO donor_screenings (donor_id, donated_recently, feeling_well, medical_advice, recent_medication_illness, willing_to_donate, answers_confirmed_accurate, eligibility_status, notes, screening_date) VALUES (?, ?, ?, ?, 'No', ?, 1, ?, 'Initial registration health self-declaration', NOW())");
+                            $scrStmt->execute([$newDonorId, $screeningRecent, $screeningFeelingWell, $screeningMedicalAdvice, $screeningWilling, $isEligible]);
                         }
 
                         // Create welcome notification explaining screening & verification

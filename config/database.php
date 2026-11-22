@@ -14,6 +14,8 @@ define('DB_PASS', '');
 define('DB_NAME', 'lifelink_db');
 define('DB_PORT', '3306');
 
+define('SCREENING_VALIDITY_DAYS', 90); // 90-day whole blood re-screening interval
+
 // Base URL helper for absolute assets and links
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)) ? "https://" : "http://";
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
@@ -70,6 +72,35 @@ function getDBConnection() {
                 INDEX `idx_token_hash` (`token_hash`),
                 CONSTRAINT `fk_password_resets_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+            // Phase 2 Schema Auto-heals: Donations verification and Donor Screenings
+            $pdo->exec("ALTER TABLE `donations` MODIFY COLUMN `verification_status` ENUM('Pending', 'Verified', 'Approved', 'Rejected') DEFAULT 'Pending'");
+            $pdo->exec("ALTER TABLE `donations` ADD COLUMN IF NOT EXISTS `verified_by` INT NULL");
+            $pdo->exec("ALTER TABLE `donations` ADD COLUMN IF NOT EXISTS `verified_at` DATETIME NULL");
+            $pdo->exec("ALTER TABLE `donations` ADD COLUMN IF NOT EXISTS `admin_notes` TEXT NULL");
+            $pdo->exec("ALTER TABLE `donations` ADD COLUMN IF NOT EXISTS `certificate_no` VARCHAR(100) NULL");
+            $pdo->exec("ALTER TABLE `donations` ADD COLUMN IF NOT EXISTS `submission_type` ENUM('manual', 'request_completion') DEFAULT 'manual'");
+
+            $pdo->exec("CREATE TABLE IF NOT EXISTS `donor_screenings` (
+                `screening_id` INT AUTO_INCREMENT PRIMARY KEY,
+                `donor_id` INT NOT NULL,
+                `request_id` INT NULL,
+                `donated_recently` ENUM('Yes', 'No') NOT NULL DEFAULT 'No',
+                `feeling_well` ENUM('Yes', 'No') NOT NULL DEFAULT 'Yes',
+                `medical_advice` ENUM('Yes', 'No') NOT NULL DEFAULT 'No',
+                `recent_medication_illness` ENUM('Yes', 'No') NOT NULL DEFAULT 'No',
+                `willing_to_donate` ENUM('Yes', 'No') NOT NULL DEFAULT 'Yes',
+                `answers_confirmed_accurate` TINYINT(1) DEFAULT 1,
+                `eligibility_status` ENUM('Self_Reported_Eligible', 'Requires_Medical_Review') DEFAULT 'Self_Reported_Eligible',
+                `notes` TEXT NULL,
+                `screening_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX `idx_screening_donor` (`donor_id`),
+                INDEX `idx_screening_request` (`request_id`),
+                CONSTRAINT `fk_screenings_donor` FOREIGN KEY (`donor_id`) REFERENCES `donors` (`donor_id`) ON DELETE CASCADE,
+                CONSTRAINT `fk_screenings_request` FOREIGN KEY (`request_id`) REFERENCES `blood_requests` (`request_id`) ON DELETE SET NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+            $pdo->exec("ALTER TABLE `request_responses` ADD COLUMN IF NOT EXISTS `screening_id` INT NULL");
         } catch (Exception $schemaEx) {}
 
         return $pdo;

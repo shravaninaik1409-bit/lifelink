@@ -69,7 +69,7 @@ $availability = trim($_GET['availability'] ?? '');
 $verificationFilter = trim($_GET['verification'] ?? '');
 
 $sql = "SELECT d.*, u.full_name, u.email, u.phone, u.verification_status, u.account_status,
-        (SELECT COUNT(*) FROM donations dn WHERE dn.donor_id = d.donor_id AND dn.verification_status = 'Verified') as total_donations
+        (SELECT COUNT(*) FROM donations dn WHERE dn.donor_id = d.donor_id AND dn.verification_status IN ('Verified', 'Approved')) as total_donations
         FROM donors d
         JOIN users u ON d.user_id = u.user_id
         WHERE 1=1";

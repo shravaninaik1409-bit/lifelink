@@ -1,8 +1,13 @@
-
 # Environment and secret files
 .env
 .env.*
 !.env.example
+config/mail.env.php
+!config/mail.env.example.php
+
+# Outbound mail & system logs
+logs/*
+!logs/.htaccess
 
 # Dependencies
 vendor/

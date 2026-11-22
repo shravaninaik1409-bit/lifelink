@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 
 $stmt = $db->prepare("SELECT f.favourite_id, d.*, u.full_name, u.phone, u.verification_status,
-                      (SELECT COUNT(*) FROM donations dn WHERE dn.donor_id = d.donor_id AND dn.verification_status = 'Verified') as total_donations
+                      (SELECT COUNT(*) FROM donations dn WHERE dn.donor_id = d.donor_id AND dn.verification_status IN ('Verified', 'Approved')) as total_donations
                       FROM favourites f
                       JOIN donors d ON f.donor_id = d.donor_id
                       JOIN users u ON d.user_id = u.user_id

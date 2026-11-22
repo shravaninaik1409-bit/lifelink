@@ -5,6 +5,7 @@
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/mailer.php';
 
 requireRole('requester');
 $currentUser = getCurrentUser();
@@ -69,23 +70,101 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             $requestId = $db->lastInsertId();
 
-            // Find matching available donors to broadcast notification
-            $matchingStmt = $db->prepare("SELECT user_id FROM donors WHERE blood_group = ? AND availability != 'Not Accepting Requests'");
-            $matchingStmt->execute([$bloodGroup]);
-            $matchingDonors = $matchingStmt->fetchAll(PDO::FETCH_COLUMN);
+            // Find matching available donors to broadcast in-app & email notification
+            // Filter by: blood group, availability, active account, and matching city/state
+            $matchingStmt = $db->prepare("
+                SELECT d.donor_id, d.user_id, d.blood_group, d.city, d.state, d.availability,
+                       u.full_name, u.email, u.phone
+                FROM donors d
+                JOIN users u ON d.user_id = u.user_id
+                WHERE d.blood_group = ?
+                  AND d.availability = 'Available'
+                  AND u.account_status = 'active'
+                  AND (LOWER(TRIM(d.city)) = LOWER(TRIM(?)) OR LOWER(TRIM(d.state)) = LOWER(TRIM(?)))
+            ");
+            $matchingStmt->execute([$bloodGroup, $city, $state]);
+            $matchingDonors = $matchingStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // If no donors matched same city/state, broaden search to all available donors of this blood group
+            if (empty($matchingDonors)) {
+                $broadStmt = $db->prepare("
+                    SELECT d.donor_id, d.user_id, d.blood_group, d.city, d.state, d.availability,
+                           u.full_name, u.email, u.phone
+                    FROM donors d
+                    JOIN users u ON d.user_id = u.user_id
+                    WHERE d.blood_group = ?
+                      AND d.availability = 'Available'
+                      AND u.account_status = 'active'
+                ");
+                $broadStmt->execute([$bloodGroup]);
+                $matchingDonors = $broadStmt->fetchAll(PDO::FETCH_ASSOC);
+            }
 
             $notifType = ($urgency === 'Emergency') ? 'emergency' : 'request';
             $notifTitle = ($urgency === 'Emergency') ? "EMERGENCY: Urgent {$bloodGroup} Blood Required" : "New Blood Request for {$bloodGroup}";
             $notifMsg = "Patient {$patientName} needs {$unitsRequired} unit(s) of {$bloodGroup} at {$hospitalName}, {$city}. Required by: " . date('d M Y', strtotime($requiredDate));
 
-            foreach ($matchingDonors as $targetUserId) {
-                createNotification($db, $targetUserId, $notifTitle, $notifMsg, $notifType, $requestId);
+            foreach ($matchingDonors as $targetDonor) {
+                createNotification($db, $targetDonor['user_id'], $notifTitle, $notifMsg, $notifType, $requestId);
             }
 
             // Create notification for requester confirming submission
             createNotification($db, $userId, "Blood Request Submitted", "Request {$uniqueRequestNumber} has been broadcast to " . count($matchingDonors) . " matching donor(s).", "system", $requestId);
 
             $db->commit();
+
+            // Dispatch external email notifications (safe non-blocking execution)
+            $emailRequestData = [
+                'request_id' => $requestId,
+                'unique_request_number' => $uniqueRequestNumber,
+                'patient_name' => $patientName,
+                'blood_group' => $bloodGroup,
+                'units_required' => $unitsRequired,
+                'hospital_name' => $hospitalName,
+                'hospital_address' => $hospitalAddress,
+                'city' => $city,
+                'state' => $state,
+                'required_date' => $requiredDate,
+                'urgency' => $urgency,
+                'additional_information' => $additionalInfo,
+                'contact_person' => $contactPerson,
+                'contact_phone' => $contactPhone
+            ];
+
+            // 1. Send confirmation email to Requester
+            $requesterEmail = trim($currentUser['email'] ?? '');
+            if (!empty($requesterEmail) && filter_var($requesterEmail, FILTER_VALIDATE_EMAIL)) {
+                try {
+                    sendBloodRequestConfirmationEmail($requesterEmail, $currentUser['full_name'], $emailRequestData, count($matchingDonors));
+                } catch (Throwable $e) {
+                    error_log("Failed to send request confirmation email to requester: " . $e->getMessage());
+                }
+            }
+
+            // 2. Broadcast notification emails to matching donors
+            $notifiedEmails = [];
+            foreach ($matchingDonors as $donor) {
+                $donorEmail = trim($donor['email'] ?? '');
+                if (!empty($donorEmail) && filter_var($donorEmail, FILTER_VALIDATE_EMAIL)) {
+                    $lowerEmail = strtolower($donorEmail);
+                    if (in_array($lowerEmail, $notifiedEmails)) {
+                        continue;
+                    }
+                    $notifiedEmails[] = $lowerEmail;
+
+                    try {
+                        sendBloodRequestNotificationEmail($donorEmail, $donor['full_name'], $emailRequestData);
+                    } catch (Throwable $mailEx) {
+                        error_log("Failed to send notification email to {$donorEmail}: " . $mailEx->getMessage());
+                    }
+                }
+            }
+
+            // 3. If zero matching donors found, write an audit entry so logs/mail.log clearly records the broadcast outcome
+            if (empty($matchingDonors)) {
+                logMailDelivery('system.broadcast@lifelink.org', "Broadcast Info: 0 Donors Found for #{$uniqueRequestNumber}", "Blood request #{$uniqueRequestNumber} for {$bloodGroup} in {$city}, {$state} was posted successfully. However, 0 active donors with availability = 'Available' currently match this criteria in the database.", 'BROADCAST_NO_DONORS');
+            }
+
             $_SESSION['flash_msg'] = "Request {$uniqueRequestNumber} posted successfully! " . count($matchingDonors) . " matching donors have been notified.";
             header("Location: " . BASE_URL . "/requester/request_details.php?id=" . $requestId);
             exit();
