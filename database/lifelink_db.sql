@@ -133,7 +133,11 @@ CREATE TABLE IF NOT EXISTS `favourites` (
   CONSTRAINT `fk_favourites_donor` FOREIGN KEY (`donor_id`) REFERENCES `donors` (`donor_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 8. FEEDBACK TABLE
+-- 8. FEEDBACK TABLE (Reserved / Currently Unused in active PHP workflows)
+-- Phase 3.2 Database Review Documentation:
+-- Purpose: Schema placeholder for user reviews and star ratings.
+-- Active PHP Queries: NONE. No PHP page in the project executes INSERT, SELECT, UPDATE, or DELETE on this table.
+-- Decision: Retained exactly as-is per project requirements for college submission and architectural completeness.
 CREATE TABLE IF NOT EXISTS `feedback` (
   `feedback_id` INT AUTO_INCREMENT PRIMARY KEY,
   `user_id` INT NULL,
@@ -159,7 +163,13 @@ CREATE TABLE IF NOT EXISTS `reports` (
   CONSTRAINT `fk_reports_request` FOREIGN KEY (`request_id`) REFERENCES `blood_requests` (`request_id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 10. CONTACT MESSAGES TABLE
+-- 10. CONTACT MESSAGES TABLE (Active Table for Inquiries & Moderation)
+-- Phase 3.2 Database Review Documentation:
+-- Purpose: Primary data store for public inquiries and contact submissions.
+-- Active PHP Queries:
+--   - contact.php: INSERT inquiries submitted by public visitors/guests
+--   - admin/feedback.php: SELECT inquiries, UPDATE read status (is_read = 1), DELETE messages
+-- Decision: Active core table, retained exactly as-is.
 CREATE TABLE IF NOT EXISTS `contact_messages` (
   `message_id` INT AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(100) NOT NULL,

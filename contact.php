@@ -1,6 +1,12 @@
 <?php
 /**
  * LifeLink - Contact Page
+ * 
+ * Phase 3.2 Database Documentation & Cleanup Review:
+ * - Active Table: `contact_messages`
+ *   Stores inquiries submitted by public visitors, hospitals, and community partners
+ *   (columns: message_id, name, email, subject, message, is_read, created_at).
+ * - Moderated via: admin/feedback.php
  */
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/functions.php';

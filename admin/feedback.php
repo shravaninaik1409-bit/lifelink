@@ -1,6 +1,12 @@
 <?php
 /**
  * LifeLink - Admin Feedback, Contact Messages & Reports
+ * 
+ * Phase 3.2 Database Documentation & Cleanup Review:
+ * - Active Table: `contact_messages` (manages public inquiries from contact.php; handles mark-as-read and deletion)
+ * - Active Table: `reports` (manages community incident reports submitted against donors/requests)
+ * - Note on `feedback` table: The database schema maintains a dedicated `feedback` table for user reviews/ratings.
+ *   Per project requirements, both `contact_messages` and `feedback` are preserved as distinct normalized entities.
  */
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/functions.php';

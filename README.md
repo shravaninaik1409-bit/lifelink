@@ -136,3 +136,25 @@ lifeLink/
 - **CSRF Defense**: Session-bound cryptographic tokens on form submissions.
 - **Session Security**: `session_regenerate_id(true)` upon login, role-restricted dashboard guards.
 - **Donor Privacy**: Sensitive mobile numbers and exact addresses are shielded from public scrapers; communication happens via secure request flows.
+
+---
+
+## 🗄️ Database Tables & Architecture (Phase 3.2 Documentation Review)
+
+LifeLink uses normalized relational storage in MySQL (`lifelink_db`):
+
+| Table | Status | Key Columns | Primary Usage |
+|---|:---:|---|---|
+| `users` | **Active** | `user_id`, `full_name`, `email`, `password`, `role`, `verification_status` | Core authentication & account roles |
+| `donors` | **Active** | `donor_id`, `user_id`, `blood_group`, `availability`, `hide_phone` | Donor profiles, privacy settings & badges |
+| `blood_requests` | **Active** | `request_id`, `unique_request_number`, `requester_id`, `blood_group`, `urgency` | Blood request lifecycle tracking (`LL-YYYY-XXXXXX`) |
+| `request_responses`| **Active** | `response_id`, `request_id`, `donor_id`, `response_status`, `consent_*` | Donor response and medical consent records |
+| `donations` | **Active** | `donation_id`, `donor_id`, `hospital_name`, `verification_status`, `verified_by` | Verified donation history & admin verification |
+| `donor_screenings` | **Active** | `screening_id`, `donor_id`, `eligibility_status`, `screening_date` | 90-day recurring health screening reconfirmation |
+| `notifications` | **Active** | `notification_id`, `user_id`, `notification_type`, `related_request_id` | In-app alerts (request, emergency, status) |
+| `password_resets` | **Active** | `id`, `user_id`, `token_hash`, `expires_at`, `used_at` | Cryptographically secure token password recovery |
+| `reports` | **Active** | `report_id`, `reported_by`, `reported_user`, `request_id`, `status` | User incident reporting & moderation (Phase 3.1) |
+| `contact_messages`| **Active** | `message_id`, `name`, `email`, `subject`, `message`, `is_read` | Public Contact Us inquiries (`contact.php`) & admin moderation (`admin/feedback.php`) |
+| `feedback` | **Reserved**| `feedback_id`, `user_id`, `subject`, `rating`, `message` | User review/rating schema placeholder (currently dormant, preserved per project specs) |
+| `favourites` | **Active** | `favourite_id`, `user_id`, `donor_id` | Bookmarked donors for rapid re-contact |
+| `admin_logs` | **Active** | `log_id`, `admin_id`, `action`, `details`, `ip_address` | Audit log of administrative state changes |
