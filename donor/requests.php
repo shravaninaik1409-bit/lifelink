@@ -157,9 +157,20 @@ require_once __DIR__ . '/../includes/donor_navbar.php';
                                             <?php endif; ?>
                                         </td>
                                         <td>
-                                            <a href="<?= BASE_URL ?>/donor/request_details.php?id=<?= $r['request_id'] ?>" class="btn btn-sm btn-lifelink-red">
-                                                Review & Act
-                                            </a>
+                                            <div class="d-flex gap-1 align-items-center">
+                                                <a href="<?= BASE_URL ?>/donor/request_details.php?id=<?= $r['request_id'] ?>" class="btn btn-sm btn-lifelink-red text-nowrap">
+                                                    Review & Act
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#reportModal" 
+                                                        data-target-type="request" 
+                                                        data-target-id="<?= $r['request_id'] ?>" 
+                                                        data-target-title="Request #<?= htmlspecialchars($r['unique_request_number'], ENT_QUOTES, 'UTF-8') ?> (Patient: <?= htmlspecialchars($r['patient_name'], ENT_QUOTES, 'UTF-8') ?>)"
+                                                        title="Report Request">
+                                                    <i class="fa-solid fa-flag"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -168,5 +179,6 @@ require_once __DIR__ . '/../includes/donor_navbar.php';
                     </table>
                 </div></div></div></div>
 
+<?php require_once __DIR__ . '/../includes/report_modal.php'; ?>
 <?php require_once __DIR__ . '/../includes/dashboard_footer.php'; ?>
 

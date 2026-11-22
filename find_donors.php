@@ -331,8 +331,17 @@ require_once __DIR__ . '/includes/navbar.php';
                                         </a>
                                     <?php endif; ?>
                                     
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#donorModal<?= $d['donor_id'] ?>">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#donorModal<?= $d['donor_id'] ?>" title="View Details">
                                         <i class="fa-solid fa-circle-info"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#reportModal" 
+                                            data-target-type="donor" 
+                                            data-target-id="<?= $d['donor_id'] ?>" 
+                                            data-target-title="<?= htmlspecialchars($d['full_name'], ENT_QUOTES, 'UTF-8') ?> (<?= htmlspecialchars($d['blood_group']) ?>)"
+                                            title="Report Inappropriate or Suspicious Profile">
+                                        <i class="fa-solid fa-flag"></i>
                                     </button>
                                 </div>
                             </div>
@@ -383,6 +392,14 @@ require_once __DIR__ . '/includes/navbar.php';
                                         </div>
                                     </div>
                                     <div class="modal-footer border-0 pt-0">
+                                        <button type="button" class="btn btn-outline-danger btn-sm me-auto" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#reportModal" 
+                                                data-target-type="donor" 
+                                                data-target-id="<?= $d['donor_id'] ?>" 
+                                                data-target-title="<?= htmlspecialchars($d['full_name'], ENT_QUOTES, 'UTF-8') ?> (<?= htmlspecialchars($d['blood_group']) ?>)">
+                                            <i class="fa-solid fa-flag me-1"></i> Report
+                                        </button>
                                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                                         <?php if ($currentUser && $currentUser['role'] === 'requester'): ?>
                                             <a href="<?= BASE_URL ?>/requester/create_request.php?blood_group=<?= urlencode($d['blood_group']) ?>&city=<?= urlencode($d['city']) ?>" class="btn btn-lifelink-red btn-sm">
@@ -400,5 +417,6 @@ require_once __DIR__ . '/includes/navbar.php';
     </div>
 </div>
 
+<?php require_once __DIR__ . '/includes/report_modal.php'; ?>
 <script src="<?= BASE_URL ?>/assets/js/search.js"></script>
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

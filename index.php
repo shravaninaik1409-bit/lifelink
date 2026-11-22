@@ -166,7 +166,18 @@ require_once __DIR__ . '/includes/navbar.php';
                         
                         <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
                             <span class="fw-bold text-danger"><?= (int)$req['units_required'] ?> Unit(s) needed</span>
-                            <a href="<?= BASE_URL ?>/login.php" class="btn btn-sm btn-lifelink-red">Respond</a>
+                            <div class="d-flex gap-1 align-items-center">
+                                <a href="<?= BASE_URL ?>/login.php" class="btn btn-sm btn-lifelink-red">Respond</a>
+                                <button type="button" class="btn btn-outline-danger btn-sm" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#reportModal" 
+                                        data-target-type="request" 
+                                        data-target-id="<?= $req['request_id'] ?>" 
+                                        data-target-title="Request #<?= htmlspecialchars($req['unique_request_number'], ENT_QUOTES, 'UTF-8') ?> (Patient: <?= htmlspecialchars($req['patient_name'], ENT_QUOTES, 'UTF-8') ?>)"
+                                        title="Report Request">
+                                    <i class="fa-solid fa-flag"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -420,4 +431,5 @@ require_once __DIR__ . '/includes/navbar.php';
     </div>
 </section>
 
+<?php require_once __DIR__ . '/includes/report_modal.php'; ?>
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

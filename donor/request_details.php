@@ -184,9 +184,18 @@ require_once __DIR__ . '/../includes/donor_navbar.php';
                     Request #<?= htmlspecialchars($req['unique_request_number']) ?>
                 </h3>
             </div>
-            <div>
+            <div class="d-flex align-items-center gap-2">
                 <?= getUrgencyBadge($req['urgency']) ?>
-                <span class="ms-1"><?= getStatusBadge($req['status']) ?></span>
+                <span><?= getStatusBadge($req['status']) ?></span>
+                <button type="button" class="btn btn-outline-danger btn-sm" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#reportModal" 
+                        data-target-type="request" 
+                        data-target-id="<?= $req['request_id'] ?>" 
+                        data-target-title="Request #<?= htmlspecialchars($req['unique_request_number'], ENT_QUOTES, 'UTF-8') ?> (Patient: <?= htmlspecialchars($req['patient_name'], ENT_QUOTES, 'UTF-8') ?>)"
+                        title="Report Suspicious or Fraudulent Request">
+                    <i class="fa-solid fa-flag me-1"></i> Report
+                </button>
             </div>
         </div>
 
@@ -476,4 +485,5 @@ require_once __DIR__ . '/../includes/donor_navbar.php';
     </div>
 </div>
 
+<?php require_once __DIR__ . '/../includes/report_modal.php'; ?>
 <?php require_once __DIR__ . '/../includes/dashboard_footer.php'; ?>

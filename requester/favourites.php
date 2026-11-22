@@ -117,10 +117,19 @@ require_once __DIR__ . '/../includes/header.php';
                                     </div>
                                 </div>
 
-                                <div class="pt-3 border-top d-grid">
-                                    <a href="<?= BASE_URL ?>/requester/create_request.php?blood_group=<?= urlencode($d['blood_group']) ?>&city=<?= urlencode($d['city']) ?>" class="btn btn-lifelink-red btn-sm">
+                                <div class="pt-3 border-top d-flex gap-2">
+                                    <a href="<?= BASE_URL ?>/requester/create_request.php?blood_group=<?= urlencode($d['blood_group']) ?>&city=<?= urlencode($d['city']) ?>" class="btn btn-lifelink-red btn-sm flex-grow-1">
                                         <i class="fa-solid fa-paper-plane me-1"></i> Send Blood Request
                                     </a>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#reportModal" 
+                                            data-target-type="donor" 
+                                            data-target-id="<?= $d['donor_id'] ?>" 
+                                            data-target-title="<?= htmlspecialchars($d['full_name'], ENT_QUOTES, 'UTF-8') ?> (<?= htmlspecialchars($d['blood_group']) ?>)"
+                                            title="Report Donor Profile">
+                                        <i class="fa-solid fa-flag"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -128,4 +137,5 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             <?php endif; ?>
 
+<?php require_once __DIR__ . '/../includes/report_modal.php'; ?>
 <?php require_once __DIR__ . '/../includes/dashboard_footer.php'; ?>

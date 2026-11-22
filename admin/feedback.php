@@ -54,7 +54,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_
 $messages = $db->query("SELECT * FROM contact_messages ORDER BY is_read ASC, created_at DESC")->fetchAll();
 
 // Fetch User Reports
-$reports = $db->query("SELECT r.*, u.full_name as reporter_name FROM reports r JOIN users u ON r.reported_by = u.user_id ORDER BY r.status = 'Pending' DESC, r.created_at DESC")->fetchAll();
+$reports = $db->query("
+    SELECT r.*, 
+           u.full_name as reporter_name,
+           target_u.full_name as reported_user_name,
+           target_r.unique_request_number,
+           target_r.patient_name as request_patient_name
+    FROM reports r 
+    JOIN users u ON r.reported_by = u.user_id 
+    LEFT JOIN users target_u ON r.reported_user = target_u.user_id
+    LEFT JOIN blood_requests target_r ON r.request_id = target_r.request_id
+    ORDER BY r.status = 'Pending' DESC, r.created_at DESC
+")->fetchAll();
 
 require_once __DIR__ . '/../includes/header.php';
 ?>
@@ -151,7 +162,18 @@ require_once __DIR__ . '/../includes/header.php';
                                     <?php foreach ($reports as $r): ?>
                                         <div class="list-group-item p-3">
                                             <div class="d-flex justify-content-between align-items-start mb-1">
-                                                <strong class="text-danger small"><?= htmlspecialchars($r['report_reason']) ?></strong>
+                                                <div>
+                                                    <strong class="text-danger small"><?= htmlspecialchars($r['report_reason']) ?></strong>
+                                                    <?php if (!empty($r['unique_request_number'])): ?>
+                                                        <span class="badge bg-light text-dark border ms-1" style="font-size: 0.7rem;">
+                                                            <i class="fa-solid fa-file-medical text-danger me-1"></i>Req #<?= htmlspecialchars($r['unique_request_number']) ?>
+                                                        </span>
+                                                    <?php elseif (!empty($r['reported_user_name'])): ?>
+                                                        <span class="badge bg-light text-dark border ms-1" style="font-size: 0.7rem;">
+                                                            <i class="fa-solid fa-user text-primary me-1"></i><?= htmlspecialchars($r['reported_user_name']) ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </div>
                                                 <span class="badge <?= $r['status'] === 'Resolved' ? 'bg-success' : 'bg-warning text-dark' ?>">
                                                     <?= htmlspecialchars($r['status']) ?>
                                                 </span>
